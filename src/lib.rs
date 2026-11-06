@@ -6,6 +6,7 @@
 //! component isolation, stable API, deterministic tests.
 
 pub mod cpio;
+pub mod pack;
 
 use std::fmt;
 /// Errors for `PlanError` operations. Fail-fast: invalid input is rejected.
