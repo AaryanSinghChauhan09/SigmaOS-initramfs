@@ -5,6 +5,8 @@
 //! Principles: single responsibility, fail-fast, defensive programming,
 //! component isolation, stable API, deterministic tests.
 
+pub mod cpio;
+
 use std::fmt;
 /// Errors for `PlanError` operations. Fail-fast: invalid input is rejected.
 #[derive(Debug, Clone, PartialEq, Eq)]
