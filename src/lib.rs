@@ -4,6 +4,7 @@
 //! Ordered execution plan: validated steps executed fail-fast, first error aborts.
 //! Principles: single responsibility, fail-fast, defensive programming,
 //! component isolation, stable API, deterministic tests.
+#![forbid(unsafe_code)]
 
 pub mod cpio;
 pub mod pack;
