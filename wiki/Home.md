@@ -11,6 +11,7 @@ mkinitcpio-style hook pipeline for kernel modules, binaries, and files.
 - Cycle and missing-dependency detection
 - JSON build plan for `sigmaos-rebuild` to execute
 - `--dry-run` / `--json` CLI output
+- `--rootfs <dir> --out <img>` packs a directory into a cpio `newc` image
 
 ## Interconnectivity
 
