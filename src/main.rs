@@ -1,6 +1,7 @@
 //! CLI for sigmaos-initramfs.
 
 use clap::Parser;
+use sigmaos_initramfs::pack::pack_dir;
 use sigmaos_initramfs::{plan_json, InitramfsConfig};
 use std::path::PathBuf;
 
@@ -16,11 +17,28 @@ struct Cli {
     /// Dry-run: show hook order without building.
     #[arg(long)]
     dry_run: bool,
+    /// Pack a rootfs directory into a cpio initramfs image.
+    #[arg(long)]
+    rootfs: Option<PathBuf>,
+    /// Output image path when using --rootfs (default: initramfs.cpio).
+    #[arg(long)]
+    out: Option<PathBuf>,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let cli = Cli::parse();
+
+    if let Some(rootfs) = &cli.rootfs {
+        let out = cli
+            .out
+            .clone()
+            .unwrap_or_else(|| PathBuf::from("initramfs.cpio"));
+        let entries = pack_dir(rootfs, &out)?;
+        println!("wrote {entries} entries to {}", out.display());
+        return Ok(());
+    }
+
     let path = cli
         .config
         .unwrap_or_else(|| PathBuf::from("/etc/sigmaos/initramfs.toml"));

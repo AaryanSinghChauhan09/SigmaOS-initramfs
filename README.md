@@ -13,6 +13,7 @@ Initramfs builder with two layers:
 ```sh
 cargo run -- --config /etc/sigmaos/initramfs.toml --dry-run
 cargo run -- --config initramfs.toml --json
+cargo run -- --rootfs /path/to/rootfs --out /boot/initramfs.img
 ```
 
 ## Config format
