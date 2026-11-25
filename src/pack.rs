@@ -45,7 +45,7 @@ impl From<CpioError> for PackError {
 fn mode_bits(md: &fs::Metadata) -> u32 {
     use std::os::unix::fs::MetadataExt;
     // Keep file-type bits + permission bits; mask to st_mode layout.
-    (md.mode() & 0o170777) as u32
+    md.mode() & 0o170777
 }
 
 #[cfg(not(unix))]

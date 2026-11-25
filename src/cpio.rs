@@ -148,6 +148,7 @@ fn validate_path(path: &str) -> Result<(), CpioError> {
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn write_header(
     out: &mut Vec<u8>,
     ino: u32,
@@ -199,7 +200,7 @@ fn write_entry(out: &mut Vec<u8>, ino: u32, e: &CpioEntry) -> Result<(), CpioErr
 
 /// Pad `out` with NULs to a 4-byte boundary (cpio newc alignment).
 fn pad4(out: &mut Vec<u8>) {
-    while out.len() % 4 != 0 {
+    while !out.len().is_multiple_of(4) {
         out.push(0);
     }
 }
