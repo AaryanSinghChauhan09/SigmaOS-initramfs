@@ -108,13 +108,51 @@ fn collect_dir(
     Ok(())
 }
 
+/// Image compression formats supported by [`pack_dir_compressed`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Compression {
+    /// Uncompressed `newc` cpio archive.
+    None,
+    /// gzip (DEFLATE) — the mkinitcpio/archiso default.
+    Gzip,
+}
+
+impl std::str::FromStr for Compression {
+    type Err = String;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "none" => Ok(Compression::None),
+            "gzip" => Ok(Compression::Gzip),
+            _ => Err(format!("unsupported compression: {s}")),
+        }
+    }
+}
+
 /// Pack `root` directory into an initramfs image written to `out_path`.
 /// Returns the number of filesystem entries included.
 pub fn pack_dir(root: &Path, out_path: &Path) -> Result<usize, PackError> {
+    pack_dir_compressed(root, out_path, Compression::None)
+}
+
+/// Like [`pack_dir`] but compresses the archive per `compression`.
+pub fn pack_dir_compressed(
+    root: &Path,
+    out_path: &Path,
+    compression: Compression,
+) -> Result<usize, PackError> {
     let mut builder = InitramfsBuilder::new();
     let count = collect_tree(root, &mut builder)?;
     let image = builder.build()?;
-    fs::write(out_path, image)?;
+    match compression {
+        Compression::None => fs::write(out_path, image)?,
+        Compression::Gzip => {
+            use std::io::Write;
+            let file = fs::File::create(out_path)?;
+            let mut enc = flate2::write::GzEncoder::new(file, flate2::Compression::default());
+            enc.write_all(&image)?;
+            enc.finish()?;
+        }
+    }
     Ok(count)
 }
 
@@ -159,6 +197,23 @@ mod tests {
         assert!(!s.contains("initramfs-test"));
         assert!(s.contains("etc/hostname"));
         let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn gzip_produces_magic_bytes() {
+        let root = fixture("gz");
+        let out = root.join("image.cpio.gz");
+        pack_dir_compressed(&root, &out, Compression::Gzip).unwrap();
+        let img = fs::read(&out).unwrap();
+        assert_eq!(&img[..2], &[0x1f, 0x8b]);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
+    fn compression_from_str() {
+        assert_eq!("gzip".parse(), Ok(Compression::Gzip));
+        assert_eq!("none".parse(), Ok(Compression::None));
+        assert!("zstd".parse::<Compression>().is_err());
     }
 
     #[test]

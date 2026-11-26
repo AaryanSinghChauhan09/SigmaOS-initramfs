@@ -1,7 +1,7 @@
 //! CLI for sigmaos-initramfs.
 
 use clap::Parser;
-use sigmaos_initramfs::pack::pack_dir;
+use sigmaos_initramfs::pack::{pack_dir_compressed, Compression};
 use sigmaos_initramfs::{plan_json, InitramfsConfig};
 use std::path::PathBuf;
 
@@ -23,6 +23,9 @@ struct Cli {
     /// Output image path when using --rootfs (default: initramfs.cpio).
     #[arg(long)]
     out: Option<PathBuf>,
+    /// Compress the image: "none" or "gzip" (default: none).
+    #[arg(long, default_value = "none")]
+    compress: String,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -34,7 +37,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .out
             .clone()
             .unwrap_or_else(|| PathBuf::from("initramfs.cpio"));
-        let entries = pack_dir(rootfs, &out)?;
+        let compression: Compression = cli.compress.parse()?;
+        let entries = pack_dir_compressed(rootfs, &out, compression)?;
         println!("wrote {entries} entries to {}", out.display());
         return Ok(());
     }
