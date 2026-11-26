@@ -113,8 +113,10 @@ fn collect_dir(
 pub enum Compression {
     /// Uncompressed `newc` cpio archive.
     None,
-    /// gzip (DEFLATE) — the mkinitcpio/archiso default.
+    /// gzip (DEFLATE).
     Gzip,
+    /// zstd — the configured default in `InitramfsConfig`.
+    Zstd,
 }
 
 impl std::str::FromStr for Compression {
@@ -123,6 +125,7 @@ impl std::str::FromStr for Compression {
         match s {
             "none" => Ok(Compression::None),
             "gzip" => Ok(Compression::Gzip),
+            "zstd" => Ok(Compression::Zstd),
             _ => Err(format!("unsupported compression: {s}")),
         }
     }
@@ -151,6 +154,10 @@ pub fn pack_dir_compressed(
             let mut enc = flate2::write::GzEncoder::new(file, flate2::Compression::default());
             enc.write_all(&image)?;
             enc.finish()?;
+        }
+        Compression::Zstd => {
+            let compressed = zstd::encode_all(&image[..], 0)?;
+            fs::write(out_path, compressed)?;
         }
     }
     Ok(count)
@@ -210,10 +217,22 @@ mod tests {
     }
 
     #[test]
+    fn zstd_produces_magic_bytes() {
+        let root = fixture("zst");
+        let out = root.join("image.cpio.zst");
+        pack_dir_compressed(&root, &out, Compression::Zstd).unwrap();
+        let img = fs::read(&out).unwrap();
+        // zstd frame magic number: 0xFD2FB528 (little-endian)
+        assert_eq!(&img[..4], &[0x28, 0xb5, 0x2f, 0xfd]);
+        let _ = fs::remove_dir_all(&root);
+    }
+
+    #[test]
     fn compression_from_str() {
         assert_eq!("gzip".parse(), Ok(Compression::Gzip));
+        assert_eq!("zstd".parse(), Ok(Compression::Zstd));
         assert_eq!("none".parse(), Ok(Compression::None));
-        assert!("zstd".parse::<Compression>().is_err());
+        assert!("xz".parse::<Compression>().is_err());
     }
 
     #[test]

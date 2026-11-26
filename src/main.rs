@@ -23,7 +23,7 @@ struct Cli {
     /// Output image path when using --rootfs (default: initramfs.cpio).
     #[arg(long)]
     out: Option<PathBuf>,
-    /// Compress the image: "none" or "gzip" (default: none).
+    /// Compress the image: "none", "gzip", or "zstd" (default: none).
     #[arg(long, default_value = "none")]
     compress: String,
 }
