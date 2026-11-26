@@ -9,9 +9,9 @@
 pub mod cpio;
 pub mod pack;
 
-use std::fmt;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
+use std::fmt;
 use std::path::{Path, PathBuf};
 /// Errors for `PlanError` operations. Fail-fast: invalid input is rejected.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -44,25 +44,37 @@ pub struct Plan {
 
 impl Plan {
     /// Empty plan.
-    pub fn new() -> Self { Self::default() }
+    pub fn new() -> Self {
+        Self::default()
+    }
 
     /// Append a step; fails on empty description.
     pub fn add_step(&mut self, step: impl Into<String>) -> Result<(), PlanError> {
         let step = step.into();
-        if step.trim().is_empty() { return Err(PlanError::EmptyStep); }
+        if step.trim().is_empty() {
+            return Err(PlanError::EmptyStep);
+        }
         self.steps.push(step);
         Ok(())
     }
 
     /// Number of steps.
-    pub fn len(&self) -> usize { self.steps.len() }
+    pub fn len(&self) -> usize {
+        self.steps.len()
+    }
 
     /// Whether the plan has no steps.
-    pub fn is_empty(&self) -> bool { self.steps.is_empty() }
+    pub fn is_empty(&self) -> bool {
+        self.steps.is_empty()
+    }
 
     /// Validate the plan is non-empty.
     pub fn validate(&self) -> Result<(), PlanError> {
-        if self.steps.is_empty() { Err(PlanError::EmptyPlan) } else { Ok(()) }
+        if self.steps.is_empty() {
+            Err(PlanError::EmptyPlan)
+        } else {
+            Ok(())
+        }
     }
 
     /// Execute steps in order via `exec`; first failure aborts and is
@@ -96,26 +108,37 @@ mod tests {
     fn run_executes_in_order() {
         let p = plan();
         let done = p.run(|_| Ok(())).unwrap();
-        assert_eq!(done, vec!["partition".to_string(), "install base".to_string()]);
+        assert_eq!(
+            done,
+            vec!["partition".to_string(), "install base".to_string()]
+        );
     }
 
     #[test]
     fn failure_aborts_plan() {
         let p = plan();
-        let res = p.run(|s| if s == "install base" { Err("boom".into()) } else { Ok(()) });
+        let res = p.run(|s| {
+            if s == "install base" {
+                Err("boom".into())
+            } else {
+                Ok(())
+            }
+        });
         assert!(matches!(res, Err(PlanError::StepFailed(_))));
     }
 
     #[test]
     fn empty_step_rejected() {
-        assert!(matches!(Plan::new().add_step(" "), Err(PlanError::EmptyStep)));
+        assert!(matches!(
+            Plan::new().add_step(" "),
+            Err(PlanError::EmptyStep)
+        ));
     }
 
     #[test]
     fn empty_plan_run_fails() {
         assert_eq!(Plan::new().run(|_| Ok(())), Err(PlanError::EmptyPlan));
     }
-
 }
 
 /// Backwards-compatible component handle (kept for existing callers/tests).
@@ -127,7 +150,9 @@ pub struct Component {
 impl Component {
     /// Create the component handle.
     pub fn new() -> Self {
-        Self { name: "SigmaOS Component" }
+        Self {
+            name: "SigmaOS Component",
+        }
     }
 
     /// Component label.
@@ -291,7 +316,9 @@ impl InitramfsConfig {
                         if let Some(hook) = self.hooks.iter().find(|x| x.name == *c) {
                             let pos = ready
                                 .iter()
-                                .position(|r| (r.order, r.name.clone()) > (hook.order, hook.name.clone()))
+                                .position(|r| {
+                                    (r.order, r.name.clone()) > (hook.order, hook.name.clone())
+                                })
                                 .unwrap_or(ready.len());
                             ready.insert(pos, hook);
                         }

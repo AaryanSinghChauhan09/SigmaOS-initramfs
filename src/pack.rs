@@ -84,10 +84,7 @@ fn collect_dir(
         let md = fs::symlink_metadata(&child)?;
         if md.file_type().is_symlink() {
             let target = fs::read_link(&child)?;
-            builder.add(CpioEntry::symlink(
-                rel_str,
-                &target.to_string_lossy(),
-            ))?;
+            builder.add(CpioEntry::symlink(rel_str, &target.to_string_lossy()))?;
         } else if md.is_dir() {
             builder.add(CpioEntry {
                 path: rel_str.clone(),
@@ -126,7 +123,8 @@ mod tests {
     use super::*;
 
     fn fixture(tag: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("initramfs-test-{}-{}", std::process::id(), tag));
+        let dir =
+            std::env::temp_dir().join(format!("initramfs-test-{}-{}", std::process::id(), tag));
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(dir.join("etc")).unwrap();
         fs::create_dir_all(dir.join("bin")).unwrap();
