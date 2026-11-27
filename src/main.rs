@@ -73,7 +73,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         return Ok(());
     }
 
-    // Real build would invoke mkinitcpio/dracut/mkinitfs here;
+    // Real build would invoke sigma-initramfs here;
     // emit the plan for the caller to execute.
     println!("{}", plan_json(&plan)?);
     Ok(())
