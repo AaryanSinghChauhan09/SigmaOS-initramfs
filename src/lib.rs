@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-//! SigmaOS-initramfs — SigmaOS initramfs component inspired by Linux Mint / Omarchy / Arch Linux.
+//! SigmaOS-initramfs — SigmaOS initramfs component following standard Linux initramfs conventions.
 //!
 //! Ordered execution plan: validated steps executed fail-fast, first error aborts.
 //! Principles: single responsibility, fail-fast, defensive programming,
