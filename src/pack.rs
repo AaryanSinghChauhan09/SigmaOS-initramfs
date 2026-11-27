@@ -1,7 +1,7 @@
 //! Directory → initramfs image packer.
 //!
 //! Walks a root filesystem tree (like `find | cpio -o -H newc`), maps each
-//! file to a [`CpioEntry`], and writes the archive — the mkinitcpio/archiso
+//! file to a [`CpioEntry`], and writes the archive — the SigmaOS initramfs builder
 //! "generate image" step on top of the [`crate::cpio`] writer.
 
 use std::fs;

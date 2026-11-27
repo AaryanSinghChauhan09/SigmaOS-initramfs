@@ -1,5 +1,5 @@
 //! cpio `newc` (CRC-free ASCII) archive writer — the initramfs image format
-//! used by Linux bootloaders (cpio -H newc), mirroring mkinitcpio/archiso output.
+//! used by bootloaders (`cpio -H newc`) for SigmaOS initramfs images.
 //!
 //! Format per entry:
 //!   header: "070701" + 13 × 8-hex-digit fields + "\0"
